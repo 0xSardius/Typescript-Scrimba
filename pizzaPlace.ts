@@ -15,22 +15,24 @@ type Order = {
   status: "ordered" | "completed";
 };
 
-const menu = [
-  { id: 1, name: "Margherita", price: 8 },
-  { id: 2, name: "Pepperoni", price: 10 },
-  { id: 3, name: "Hawaiian", price: 10 },
-  { id: 4, name: "Veggie", price: 9 },
+const menu: Pizza[] = [
+  { id: getNextPizzaId(), name: "Margherita", price: 8 },
+  { id: getNextPizzaId(), name: "Pepperoni", price: 10 },
+  { id: getNextPizzaId(), name: "Hawaiian", price: 10 },
+  { id: getNextPizzaId(), name: "Veggie", price: 9 },
 ];
 
 let cashInRegister = 100;
 let nextOrderId = 1;
+let nextPizzaId: number = 0;
 const orderQueue: Order[] = [];
 
-function addNewPizza(pizzaObj: Pizza) {
-  menu.push(pizzaObj);
+function addNewPizza(pizzaObj: Omit<Pizza, "id">): void {
+  const newPizza: Pizza = { ...pizzaObj, id: getNextPizzaId() };
+  menu.push(newPizza);
 }
 
-function placeOrder(pizzaName: string) {
+function placeOrder(pizzaName: string): Order | undefined {
   const selectedPizza = menu.find((pizzaObj) => pizzaObj.name === pizzaName);
   if (!selectedPizza) {
     console.error(`${pizzaName} does not exist in the menu`);
@@ -46,7 +48,7 @@ function placeOrder(pizzaName: string) {
   return newOrder;
 }
 
-function completeOrder(orderId: number) {
+function completeOrder(orderId: number): Order | undefined {
   const order = orderQueue.find((order) => order.id === orderId);
   if (!order) {
     console.error(`${orderId} was not found in the order queue`);
@@ -69,19 +71,25 @@ function getCashInRegister() {
   return cashInRegister;
 }
 
-function getPizzaDetail(identifier: number | string) {
+function getNextPizzaId(): number {
+  return nextPizzaId++;
+}
+
+function getPizzaDetail(identifier: number | string): Pizza | undefined {
   if (typeof identifier === "number") {
     return menu.find((pizza) => pizza.id === identifier);
-  } else {
+  } else if (typeof identifier === "string") {
     return menu.find(
       (pizza) => pizza.name.toLowerCase() === identifier.toLowerCase()
     );
+  } else {
+    throw new TypeError("Invalid identifier type");
   }
 }
 
-addNewPizza({ id: 5, name: "Chicken Bacon Ranch", price: 12 });
-addNewPizza({ id: 6, name: "BBQ Chicken", price: 12 });
-addNewPizza({ id: 7, name: "Spicy Sausage", price: 11 });
+addNewPizza({ name: "Chicken Bacon Ranch", price: 12 });
+addNewPizza({ name: "BBQ Chicken", price: 12 });
+addNewPizza({ name: "Spicy Sausage", price: 11 });
 
 placeOrder("Chicken Bacon Ranch");
 completeOrder(1);
